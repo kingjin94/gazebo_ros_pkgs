@@ -63,16 +63,15 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
 
   // Trigger camera once
   auto pub = node->create_publisher<std_msgs::msg::Empty>(
-    "test_triggered_cam/image_trigger_test");
+    "test_triggered_cam/image_trigger_test", rclcpp::QoS(rclcpp::KeepLast(1)));
   std_msgs::msg::Empty msg;
   pub->publish(msg);
 
   // Step a bit and check that we get exactly one message
-  world->Step(100);
-
   unsigned int sleep = 0;
   unsigned int max_sleep = 30;
   while (sleep < max_sleep && msg_count == 0) {
+    world->Step(100);
     executor.spin_once(100ms);
     sleep++;
   }
@@ -87,10 +86,9 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   executor.spin_once(100ms);
 
   // Step a bit and check that we get exactly two messages
-  world->Step(100);
-
   sleep = 0;
   while (sleep < max_sleep && msg_count < 3) {
+    world->Step(100);
     executor.spin_once(100ms);
     sleep++;
   }
