@@ -118,7 +118,7 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
   // Subscribe to distorted camera info
   sensor_msgs::msg::CameraInfo::SharedPtr cam_info_distorted;
   cam_info_distorted_sub_ = node->create_subscription<sensor_msgs::msg::CameraInfo>(
-    GetParam().distorted_cam_topic,
+    GetParam().distorted_cam_topic, rclcpp::SensorDataQoS(),
     [&cam_info_distorted](const sensor_msgs::msg::CameraInfo::SharedPtr _msg) {
       cam_info_distorted = _msg;
     });
@@ -200,16 +200,14 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
 INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest,
   ::testing::Values(
-    TestParams({
-  "worlds/gazebo_ros_camera_distortion_barrel.world",
-  "undistorted_image",
-  "distorted_image",
-  "distorted_info"
-})
-//  TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
-//              "undistorted_image",
-//              "distorted_image",
-//              "distorted_info"})
+    TestParams({"worlds/gazebo_ros_camera_distortion_barrel.world",
+      "undistorted_image",
+      "distorted_image",
+      "distorted_info"}),
+    TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
+      "undistorted_image",
+      "distorted_image",
+      "distorted_info"})
   ), );
 
 int main(int argc, char ** argv)

@@ -18,6 +18,7 @@
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
+#include <string>
 
 using namespace std::literals::chrono_literals; // NOLINT
 
@@ -62,14 +63,23 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   EXPECT_EQ(0u, msg_count);
 
   // Trigger camera once
+  std::string trigger_topic{"test_triggered_cam/image_trigger_test"};
   auto pub = node->create_publisher<std_msgs::msg::Empty>(
-    "test_triggered_cam/image_trigger_test", rclcpp::QoS(rclcpp::KeepLast(1)));
+    trigger_topic, rclcpp::QoS(rclcpp::KeepLast(1)));
   std_msgs::msg::Empty msg;
+
+  // Wait for trigger subscriber
+  unsigned int sleep = 0;
+  unsigned int max_sleep = 30;
+  while (sleep < max_sleep && node->count_subscribers(trigger_topic) == 0) {
+    gazebo::common::Time::MSleep(100);
+  }
+  EXPECT_EQ(1u, node->count_subscribers(trigger_topic));
+
   pub->publish(msg);
 
   // Step a bit and check that we get exactly one message
-  unsigned int sleep = 0;
-  unsigned int max_sleep = 30;
+  sleep = 0;
   while (sleep < max_sleep && msg_count == 0) {
     world->Step(100);
     executor.spin_once(100ms);
